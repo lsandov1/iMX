@@ -1,0 +1,17 @@
+#!/bin/bash
+
+boot=$1
+
+kernel_1=$2
+seek_kernel_1=2048
+
+kernel_2=$3
+seek_kernel_2=20480
+
+rootfs=$4
+seek_rootfs=409060
+
+./mk_mx_sd -u $boot
+./mk_mx_sd -k $kernel_1 -y $seek_kernel_1
+./mk_mx_sd -k $kernel_2 -y $seek_kernel_2
+./mk_mx_sd -r $rootfs   -s $seek_rootfs

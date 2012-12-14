@@ -1,0 +1,115 @@
+diff -Naur arch/arm/mach-mx6/board-mx6q_arm2.c arch.mod/arm/mach-mx6/board-mx6q_arm2.c
+--- arch/arm/mach-mx6/board-mx6q_arm2.c	2012-12-10 10:10:56.588875772 -0600
++++ arch.mod/arm/mach-mx6/board-mx6q_arm2.c	2012-12-10 10:28:47.016930901 -0600
+@@ -1450,7 +1450,7 @@
+ };
+ 
+ static struct fsl_mxc_hdmi_core_platform_data hdmi_core_data = {
+-	.ipu_id		= 0,
++	.ipu_id		= 1,
+ 	.disp_id	= 0,
+ };
+ 
+@@ -1461,11 +1461,11 @@
+ };
+ 
+ static struct fsl_mxc_ldb_platform_data ldb_data = {
+-	.ipu_id		= 1,
+-	.disp_id	= 0,
++	.ipu_id		= 0,
++	.disp_id	= 1,
+ 	.ext_ref	= 1,
+ 	.mode		= LDB_SEP0,
+-	.sec_ipu_id	= 0,
++	.sec_ipu_id	= 1,
+ 	.sec_disp_id	= 1,
+ };
+ 
+diff -Naur arch/arm/mach-mx6/board-mx6q_sabresd.c arch.mod/arm/mach-mx6/board-mx6q_sabresd.c
+--- arch/arm/mach-mx6/board-mx6q_sabresd.c	2012-12-10 10:10:53.340875607 -0600
++++ arch.mod/arm/mach-mx6/board-mx6q_sabresd.c	2012-12-10 11:02:45.093033898 -0600
+@@ -777,6 +777,41 @@
+ 	.rext = 499,	/* calibration: 499K->700K */
+ };
+ 
++static int sii902x_get_pins(void)
++{
++      /* Sii902x HDMI controller */
++      gpio_request(SABRESD_DISP0_PWR_EN, "disp0-pwr");
++      gpio_direction_output(SABRESD_DISP0_PWR_EN, 1);
++      gpio_request(SABRESD_DISP0_RST_B, "disp0-reset");
++      gpio_direction_output(SABRESD_DISP0_RST_B, 0);
++      gpio_request(SABRESD_DISP0_RD, "disp0-detect");
++      gpio_direction_input(SABRESD_DISP0_RD);
++      return 1;
++}
++    
++static void sii902x_put_pins(void)
++{
++      gpio_free(SABRESD_DISP0_RST_B);
++      gpio_free(SABRESD_DISP0_RD);
++      gpio_free(SABRESD_DISP0_PWR_EN);
++}
++    
++static void sii902x_hdmi_reset(void)
++{
++      gpio_set_value(SABRESD_DISP0_RST_B, 0);
++      msleep(10);
++      gpio_set_value(SABRESD_DISP0_RST_B, 1);
++      msleep(10);
++}
++    
++static struct fsl_mxc_lcd_platform_data sii902x_hdmi_data = {
++      .ipu_id = 0,
++      .disp_id = 0,
++      .reset = sii902x_hdmi_reset,
++      .get_pins = sii902x_get_pins,
++      .put_pins = sii902x_put_pins,
++};
++
+ static struct i2c_board_info mxc_i2c0_board_info[] __initdata = {
+ 	{
+ 		I2C_BOARD_INFO("wm89**", 0x1a),
+@@ -808,6 +843,11 @@
+ 		.platform_data = (void *)&max11801_mode,
+ 		.irq = gpio_to_irq(SABRESD_TS_INT),
+ 	},
++        {
++                I2C_BOARD_INFO("sii902x", 0x39),
++                .platform_data = &sii902x_hdmi_data,
++                .irq = gpio_to_irq(SABRESD_DISP0_RD),
++	},
+ };
+ 
+ static struct i2c_board_info mxc_i2c2_board_info[] __initdata = {
+@@ -1317,7 +1357,7 @@
+ };
+ 
+ static struct fsl_mxc_hdmi_core_platform_data hdmi_core_data = {
+-	.ipu_id = 0,
++	.ipu_id = 1,
+ 	.disp_id = 0,
+ };
+ 
+@@ -1328,8 +1368,8 @@
+ };
+ 
+ static struct fsl_mxc_ldb_platform_data ldb_data = {
+-	.ipu_id = 1,
+-	.disp_id = 0,
++	.ipu_id = 0,
++	.disp_id = 1,
+ 	.ext_ref = 1,
+ 	.mode = LDB_SEP0,
+ 	.sec_ipu_id = 1,
+@@ -1818,6 +1858,10 @@
+ 	gpio_request(SABRESD_ALS_INT, "als-int");
+ 	gpio_direction_input(SABRESD_ALS_INT);
+ 
++        /* enable DISP0 power */
++        gpio_request(SABRESD_DISP0_PWR_EN, "disp0-pwr");
++        gpio_direction_output(SABRESD_DISP0_PWR_EN, 1);
++
+ 	imx6q_add_hdmi_soc();
+ 	imx6q_add_hdmi_soc_dai();
+ 

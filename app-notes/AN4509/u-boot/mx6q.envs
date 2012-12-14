@@ -1,0 +1,65 @@
+# Base
+setenv loadaddr 0x10800000
+setenv bootargs_base 'setenv bootargs console=ttymxc0,115200'
+setenv ldb_fb0 'video=mxcfb0:dev=ldb,LDB-XGA,if=RGB666'
+setenv ldb_fb1 'video=mxcfb1:dev=ldb,LDB-XGA,if=RGB666'
+setenv ldb_fb2 'video=mxcfb2:dev=ldb,LDB-XGA,if=RGB666'
+setenv hdmi_fb0 'video=mxcfb0:dev=hdmi,1920x1080M@60,if=RGB24'
+setenv hdmi_fb1 'video=mxcfb1:dev=hdmi,1920x1080M@60,if=RGB24'
+
+# SD
+setenv bootargs_mmc 'setenv bootargs ${bootargs} root=/dev/mmcblk1p1 rootwait rw ip=none'
+setenv sd_kernel_offset 0x800
+setenv bootcmd_mmc 'run bootargs_base bootargs_mmc bootargs_${use_case}; mmc dev 2; mmc read ${loadaddr} ${sd_kernel_offset} 0x2000;bootm'
+
+# NFS
+setenv serverip <your server's IP address)
+setenv bootfile uImage
+setenv nfsroot <the NFS exported rootfs path>
+setenv bootargs_nfs 'setenv bootargs ${bootargs} root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp'
+
+# Use cases
+setenv bootargs_default 'setenv bootargs ${bootargs} ${ldb_fb0}'
+setenv bootargs_deep_sleep  'setenv bootargs ${bootargs} ${ldb_fb0}'
+setenv bootargs_system_idle 'setenv bootargs ${bootargs} ${ldb_fb0}'
+setenv bootargs_user_idle   'setenv bootargs ${bootargs} ${ldb_fb0}'
+setenv bootargs_audio_playback      'setenv bootargs ${bootargs} ${ldb_fb0} enable_wait_mode=on' 
+setenv bootargs_video_playback_lvds 'setenv bootargs ${bootargs} ${ldb_fb0}'
+setenv bootargs_video_playback_hdmi 'setenv bootargs ${bootargs} vmalloc=256M enable_wait_mode=on ${hdmi_fb0}'
+setenv bootargs_dhrystone_quad 'setenv bootargs ${bootargs} ${ldb_fb0} max_cpu=4'
+setenv bootargs_dhrystone_dual 'setenv bootargs ${bootargs} ${ldb_fb0} max_cpu=2'
+setenv bootargs_dhrystone_single 'setenv bootargs ${bootargs} ${ldb_fb0} max_cpu=1'
+setenv bootargs_3d_gamming_mm06 'setenv bootargs ${bootargs} ${ldb_fb0}'
+setenv bootargs_3d_gamming_mm07 'setenv bootargs ${bootargs} ${ldb_fb0}'
+setenv bootargs_max_power 'setenv bootfile uImageMaxPower; setenv sd_kernel_offset 0x5000; setenv bootargs ${bootargs} disable_mipi_dsi video=mxcfb0:dev=sii902x_hdmi,1920x1080M@60,if=RGB24 ${hdmi_fb1} ${ldb_fb2} ldb=sep0}'
+setenv bootargs_usb_to_emmc_file_transfer 'setenv bootargs ${bootargs} ${ldb_fb0}'
+
+
+# Usage: 
+#       1. Select one of these
+#
+#       setenv use_case 'default'
+#       setenv use_case 'deep_sleep'
+#       setenv use_case 'system_idle'
+#       setenv use_case 'user_idle'
+#       setenv use_case 'audio_playback'
+#       setenv use_case 'video_playback_lvds'
+#       setenv use_case 'video_playback_hdmi'
+#       setenv use_case 'dhrystone_quad'
+#       setenv use_case 'dhrystone_dual'
+#       setenv use_case 'dhrystone_single'
+#       setenv use_case '3d_gamming_mm06'
+#       setenv use_case '3d_gamming_mm07'
+#       setenv use_case 'max_power'
+#       setenv use_case 'usb_to_emmc_file_transfer'
+#
+#       2. Select SD or NFS booting
+#
+#       setenv bootcmd 'run bootcmd_mmc' # OR 
+#       setenv bootcmd 'run bootargs_base bootargs_nfs bootargs_${use_case}; dhcp; bootm'
+        
+#       3. Save and boot
+#
+#       save
+#       run bootcmd
+

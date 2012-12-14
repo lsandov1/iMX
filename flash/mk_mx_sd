@@ -1,0 +1,199 @@
+#!/bin/bash
+
+set -e
+
+#############################################
+# Command line parameters
+#############################################
+
+device="/dev/sdX"
+uboot=""
+kernel=""
+rootfs=""
+block_size=512
+seek_uboot=2
+seek_kernel=2048
+seek_partition=16384
+
+DEBUG=
+
+OPTIONS=":HDd:u:k:r:b:x:y:s:"
+
+# Usage function
+function print_usage() {
+    echo -e "\nUsage: $0 [-${OPTIONS//:/}]"
+    echo -e "     Defaults: "
+    echo -e "         -H  Prints this usage help"
+    echo -e "         -D  Do not execute the cmds, just print them"
+    echo -e "         -d  $device   [The device node of the SD card]"
+    echo -e "         -u  $uboot    [The path for U-boot. Expects a image WITH padding]"
+    echo -e "         -k  $kernel   [The path for the Linux Kernel]"
+    echo -e "         -r  $rootfs   [The path where the filesystem is located]"
+    echo -e "         -b  $block_size   [The block size (bs)]"
+    echo -e "         -x  $seek_uboot   [U-boot starting block]"
+    echo -e "         -y  $seek_kernel  [Kernel starting block]"
+    echo -e "         -s  $seek_partition [Partition starting block]"
+    echo -e "\n"
+  }
+
+while getopts "$OPTIONS" Option
+do
+  case $Option in
+    H ) print_usage
+        exit 0
+        ;;
+    D ) DEBUG="echo"
+        echo "*** DEBUG mode. No changes will be applied. ***"
+        ;;
+    d ) device="$OPTARG";
+        echo "OPTARG $OPTARG";
+        ;;
+    u ) uboot="$OPTARG"
+        ;;
+    k ) kernel="$OPTARG"
+        ;;
+    r ) rootfs="$OPTARG"
+        ;;
+    b ) block_size="$OPTARG"
+        ;;
+    x ) seek_uboot="$OPTARG"
+        ;;
+    y ) seek_kernel="$OPTARG"
+        ;;
+    s ) seek_partition="$OPTARG"
+        ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+
+
+
+#############################################
+# FUNCTIONS definitions
+#############################################
+
+
+# This function check if the the device to be flash is the hard disk
+# If true, it exits
+function is_sda() {
+
+  if [[ $1 == *sda* ]]
+  then
+      echo -e "This script will not work on /dev/sda, which is usually a hard disk."
+      echo -e "Exiting."
+      exit 1
+  fi
+}
+
+
+# This function tests to see if the given device $1 is
+# mounted, as shown in /etc/mtab.
+# Return value $bMounted==1 if mounted, zero otherwise.
+function is_mounted() {
+    if grep -q -e "^$1.*" /etc/mtab; then
+        # mounted
+        bMounted=1      
+    else
+        # not mounted
+        bMounted=0
+    fi
+}
+
+function dd_cmd() {
+  $DEBUG sudo dd if=$1 of=$2 bs=$3 seek=$4 skip=$5 conv=fsync
+}
+
+function remove_partitions() {
+  $DEBUG sudo dd if=/dev/zero of=$1  bs=512  count=1
+}
+
+function primary_partition() {
+
+    remove_partitions $1
+
+    if [[ $DEBUG ]] ;
+    then
+        WRITE=q
+    else
+        WRITE=w
+    fi
+echo "u
+u
+d
+n
+p
+1
+$2
+
+$WRITE" | sudo fdisk $1
+
+    # format device
+    $DEBUG sudo mkfs.ext3 $1"1"
+
+    #copy filesystem
+    current=`pwd`
+    tmp_folder=$current"/tmp"
+    $DEBUG mkdir -p $tmp_folder
+    $DEBUG sudo mount $1"1" $tmp_folder
+    $DEBUG cd $3
+    $DEBUG sudo cp -rpa [A-z]* $tmp_folder
+    $DEBUG cd $current
+    $DEBUG sudo umount $tmp_folder
+    $DEBUG rmdir $tmp_folder
+}
+
+#############################################
+# OK, here it goes.
+#############################################
+
+
+# Check if files exist
+[[ -n $device && -e $device && -b $device ]] || { echo -e "Device $device is not present or it is not a block device"; print_usage; exit 1; }
+
+if [[ -n $uboot ]]; then
+  [[ -e $uboot  && -s $uboot ]]  || { echo -e "U-boot file $uboot is not present or it has zero size"; print_usage; exit 1; }
+fi
+
+if [[ -n $kernel ]]; then
+  [[ -e $kernel && -s $kernel ]] || { echo -e "Kernel file $kernel is not present or it has zero size"; print_usage; exit 1; }
+fi
+
+if [[ -n $rootfs ]]; then
+  [[ -d $rootfs ]] || { echo -e "The filesystem $rootfs is not present"; print_usage; exit 1; }
+fi
+
+# Make sure the device is not the hard disk
+is_sda $device
+
+# Make sure device is mounted
+is_mounted $device
+
+# Flash u-boot
+if [[ -n $uboot ]]; then 
+  # Clean previous U-boot data
+  echo -e "Cleaning previous U-boot data"
+  dd_cmd /dev/zero $device $block_size $seek_kernel 0
+  skip=2
+  echo -e "Flashing U-boot"
+  dd_cmd $uboot    $device $block_size $seek_uboot $skip
+fi
+
+# Flash kernel
+if [[ -n $kernel ]]; then
+  skip=0
+  echo -e "Flashing the Linux Kernel"
+  dd_cmd $kernel $device $block_size $seek_kernel $skip
+fi
+
+# Make partition and copy filesystem
+if [[ -n $rootfs ]]; then 
+  echo -e "Creating Partition and copying the filesystem"
+  primary_partition $device $seek_partition $rootfs
+fi

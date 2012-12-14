@@ -5,11 +5,11 @@ Steps
 
 2. Patch:
 
-    patch -p0 < max_power.patch
+    `patch -p0 < max_power.patch`
 
 3. Rebuilt uImage
 
-    make ARCH=arm CROSS_COMPILE=$TOOLCHAIN uImage
+    `make ARCH=arm CROSS_COMPILE=$TOOLCHAIN uImage`
 
 
 NOTE: Patched tests for kernel version `3.0.35-imx_12.09`.

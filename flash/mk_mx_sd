@@ -110,8 +110,16 @@ function dd_cmd() {
   $DEBUG sudo dd if=$1 of=$2 bs=$3 seek=$4 skip=$5 conv=fsync
 }
 
+function clean {
+  $DEBUG sudo dd if=/dev/zero of=$1 bs=512  count=$2
+}
+
 function remove_partitions() {
-  $DEBUG sudo dd if=/dev/zero of=$1  bs=512  count=1
+  clean $1 1
+}
+
+function clean_uboot_area() {
+  clean $1 $2
 }
 
 function primary_partition() {
@@ -179,7 +187,7 @@ is_mounted $device
 if [[ -n $uboot ]]; then 
   # Clean previous U-boot data
   echo -e "Cleaning previous U-boot data"
-  dd_cmd /dev/zero $device $block_size $seek_kernel 0
+  clean_uboot_area $device $seek_kernel
   skip=2
   echo -e "Flashing U-boot"
   dd_cmd $uboot    $device $block_size $seek_uboot $skip

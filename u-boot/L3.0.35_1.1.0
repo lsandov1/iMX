@@ -1,0 +1,30 @@
+## Run Image from NFS
+# TFTP settings
+setenv bootfile uImage; setenv loadaddr 0x10800000
+
+#Display settings
+setenv video0     'video=mxcfb0'
+setenv video1     'video=mxcfb1'
+setenv lvds0      '${video0}:dev=ldb,LDB-XGA,if=RGB666'
+setenv lvds1      '${video1}:dev=ldb,LDB-XGA,if=RGB666'
+setenv hdmi       '${video0}:dev=hdmi,1920x1080M@60,if=RGB24 ${lvds1}'
+
+# Bootargs settings
+setenv bootargs_base    'setenv bootargs console=ttymxc0,115200'
+setenv bootargs_nfs     'setenv bootargs ${bootargs} root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp ${display}'
+
+setenv bootargs_lvds0   'setenv bootargs ${bootargs} ${lvds0}'
+setenv bootargs_lvds1   'setenv bootargs ${bootargs} ${lvds1}'
+setenv bootargs_hdmi    'setenv bootargs ${bootargs} ${hdmi}'
+
+
+# Boot settings
+#setenv bootcmd_net  'run bootargs_base bootargs_nfs bootargs_${display};bootm'
+setenv bootcmd_net  'run bootargs_base bootargs_nfs;bootm'
+setenv bootcmd      'dhcp; run bootcmd_net'
+
+# User define settings <the display you want: lvds0, lvds1 or hdmi>
+setenv display lvds0 
+setenv serverip <your server ip>
+setenv nfsroot <your nfs folder>
+

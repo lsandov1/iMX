@@ -9,7 +9,7 @@ Flashing
 
 1. Create folder where all binaries will be downloaded
 
-    $ mkdir AN4509 && cd AN4509
+        $ mkdir AN4509 && cd AN4509
 
 1. Download flashing scripts
 

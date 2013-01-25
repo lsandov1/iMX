@@ -34,6 +34,9 @@ setenv bootargs_3d_gamming_mm07 'setenv bootargs ${bootargs} ${ldb_fb0}'
 setenv bootargs_max_power 'setenv bootfile uImageMaxPower; setenv sd_kernel_offset 0x5000; setenv bootargs ${bootargs} disable_mipi_dsi video=mxcfb0:dev=sii902x_hdmi,1920x1080M@60,if=RGB24 ${hdmi_fb1} ${ldb_fb2} ldb=sep0}'
 setenv bootargs_usb_to_emmc_file_transfer 'setenv bootargs ${bootargs} ${ldb_fb0}'
 
+# Default values
+setenv use_case 'default'
+setenv bootcmd 'run bootcmd_mmc'
 
 # Usage: 
 #       1. Select one of these
@@ -61,5 +64,5 @@ setenv bootargs_usb_to_emmc_file_transfer 'setenv bootargs ${bootargs} ${ldb_fb0
 #       3. Save and boot
 #
 #       save
-#       run bootcmd
+#       boot
 

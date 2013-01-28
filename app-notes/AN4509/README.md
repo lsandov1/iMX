@@ -18,6 +18,7 @@ Flashing
 
 1. Run the flashing script
 
+        $ cd flash_sd
         $ mk_sd_an4509.sh /dev/sdX
 
 1. Plug the SD on the target (i.MX6) and select the correct boot-mode thorugh 

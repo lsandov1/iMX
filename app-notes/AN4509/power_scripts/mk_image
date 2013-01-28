@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-#{ $# -ne 5 } || { echo "Usage: ./$0 </dev/sdX> <u-boot file> <kernel 1> <kernel 2> <rootfs>" }
+if [ $# -ne 5 ]
+then
+    echo "Usage: ./$0 </dev/sdX> <u-boot file> <kernel 1> <kernel 2> <rootfs>"
+    exit -1
+fi
 
 # device node of the SD card
 dev=$1

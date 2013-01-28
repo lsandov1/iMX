@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+#{ $# -ne 5 } || { echo "Usage: ./$0 </dev/sdX> <u-boot file> <kernel 1> <kernel 2> <rootfs>" }
+
+# device node of the SD card
+dev=$1
+boot=$2
+kernel_1=$3
+kernel_2=$4
+rootfs=$5
+
+# set block seeks
+seek_kernel_1=2048
+seek_kernel_2=20480
+seek_rootfs=409060
+
+# Do the flashing
+uboot_padding=0
+$DEBUG ./mk_mx_sd -d $dev -u $boot -p $uboot_padding
+$DEBUG ./mk_mx_sd -d $dev -k $kernel_1 -y $seek_kernel_1
+$DEBUG ./mk_mx_sd -d $dev -k $kernel_2 -y $seek_kernel_2
+$DEBUG ./mk_mx_sd -d $dev -r $rootfs   -s $seek_rootfs

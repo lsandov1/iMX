@@ -11,13 +11,14 @@ uboot=""
 kernel=""
 rootfs=""
 block_size=512
+uboot_padding=2
 seek_uboot=2
 seek_kernel=2048
 seek_partition=16384
 
 DEBUG=
 
-OPTIONS=":HDd:u:k:r:b:x:y:s:"
+OPTIONS=":HDd:u:k:r:b:x:y:s:p:"
 
 # Usage function
 function print_usage() {
@@ -26,7 +27,8 @@ function print_usage() {
     echo -e "         -H  Prints this usage help"
     echo -e "         -D  Do not execute the cmds, just print them"
     echo -e "         -d  $device   [The device node of the SD card]"
-    echo -e "         -u  $uboot    [The path for U-boot. Expects a image WITH padding]"
+    echo -e "         -u  $uboot    [The path for U-boot]"
+    echo -e "         -p  $uboot_padding [Indicate the number of padding blocks on U-boot]"
     echo -e "         -k  $kernel   [The path for the Linux Kernel]"
     echo -e "         -r  $rootfs   [The path where the filesystem is located]"
     echo -e "         -b  $block_size   [The block size (bs)]"
@@ -46,10 +48,11 @@ do
         echo "*** DEBUG mode. No changes will be applied. ***"
         ;;
     d ) device="$OPTARG";
-        echo "OPTARG $OPTARG";
         ;;
     u ) uboot="$OPTARG"
         ;;
+    p ) uboot_padding="$OPTARG"
+        ;;        
     k ) kernel="$OPTARG"
         ;;
     r ) rootfs="$OPTARG"
@@ -133,7 +136,6 @@ function primary_partition() {
         WRITE=w
     fi
 echo "u
-u
 d
 n
 p
@@ -188,9 +190,9 @@ if [[ -n $uboot ]]; then
   # Clean previous U-boot data
   echo -e "Cleaning previous U-boot data"
   clean_uboot_area $device $seek_kernel
-  skip=2
+  
   echo -e "Flashing U-boot"
-  dd_cmd $uboot    $device $block_size $seek_uboot $skip
+  dd_cmd $uboot    $device $block_size $seek_uboot $uboot_padding
 fi
 
 # Flash kernel

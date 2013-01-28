@@ -11,15 +11,15 @@ Flashing
     
         $ dmesg | tail
    
-   Note: Make sure the SD is **NOT** mounted
-   Warning: Make sure the device is not the hard disk where your host filesystem
-   resides. Host filesystem are tipically mounted from `/dev/sda`
+   Notes: 
+    Make sure the SD is **NOT** mounted
+    Make sure the device is not the hard disk where your host filesystem
+    resides. Host filesystem are tipically mounted from `/dev/sda`
 
 
 1. Run the flashing script
 
-        $ cd flash_sd
-        $ mk_sd_an4509.sh /dev/sdX
+        $ source flash_sd/mk_sd_an4509.sh /dev/sdX
 
 1. Plug the SD on the target (i.MX6) and select the correct boot-mode thorugh 
    the Dip switch.

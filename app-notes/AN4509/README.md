@@ -7,28 +7,6 @@ have a Linux system running to do the proper measurements.
 Flashing
 --------
 
-1. Create folder where all binaries will be downloaded
-
-        $ mkdir AN4509 && cd AN4509
-
-1. Download flashing scripts and give exec permissions
-
-        $ curl https://raw.github.com/lsandoval/iMX/master/flash/mk_mx_sd > mk_mx_sd
-        $ curl https://raw.github.com/lsandoval/iMX/master/app-notes/AN4509/scripts/mk_image > mk_image
-        $ chmod +x mk_mx_sd mk_image
-           
-1. Download the binaries located on 
-
-        $ wget http://vfae-server:8000/AN/AN4509/rootfs.tar.bz2
-        $ wget http://vfae-server:8000/AN/AN4509/uImage
-        $ wget http://vfae-server:8000/AN/AN4509/uImageMaxPower
-        
-1. Untar the filesystem
-
-        $ mkdir rootfs
-        $ sudo tar xjvf rootfs.tar.bz2 -C rootfs
-                
-
 1. Plug the SD into your host computer and figure out the device node given
     
         $ dmesg | tail
@@ -36,10 +14,11 @@ Flashing
    Note: Make sure the SD is **NOT** mounted
    Warning: Make sure the device is not the hard disk where your host filesystem
    resides. Host filesystem are tipically mounted from `/dev/sda`
-        
-1. Flash the SD
 
-        $ sudo ./mk_image </dev/sdX> u-boot.bin uImage uImageMaxPower rootfs
+
+1. Run the flashing script
+
+        $ mk_sd_an4509.sh /dev/sdX
 
 1. Plug the SD on the target (i.MX6) and select the correct boot-mode thorugh 
    the Dip switch.

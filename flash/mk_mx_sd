@@ -148,13 +148,11 @@ $WRITE" | sudo fdisk $1
     $DEBUG sudo mkfs.ext3 $1"1"
 
     #copy filesystem
-    current=`pwd`
-    tmp_folder=$current"/tmp"
-    $DEBUG mkdir -p $tmp_folder
+    tmp_folder=`mktemp -d`
     $DEBUG sudo mount $1"1" $tmp_folder
     $DEBUG cd $3
     $DEBUG sudo cp -rpa [A-z]* $tmp_folder
-    $DEBUG cd $current
+    $DEBUG cd -
     $DEBUG sudo umount $tmp_folder
     $DEBUG rmdir $tmp_folder
 }

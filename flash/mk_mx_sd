@@ -135,14 +135,14 @@ function primary_partition() {
     else
         WRITE=w
     fi
-echo "u
+echo "
 d
 n
 p
 1
 $2
 
-$WRITE" | sudo fdisk $1
+$WRITE" | sudo fdisk $1 -u='sectors'
 
     # format device
     $DEBUG sudo mkfs.ext3 $1"1"

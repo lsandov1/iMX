@@ -56,8 +56,8 @@ echo "Flash the SD"
 $DEBUG sudo ./mk_image $dev \
                 u-boot.bin \
                 uImage \
-                uImageMaxPower # \
-#                $tmp_rootfs_folder
+                uImageMaxPower  \
+                $tmp_rootfs_folder
 
 #echo "Clean up: remove temporal folders"
 $DEBUG cd -

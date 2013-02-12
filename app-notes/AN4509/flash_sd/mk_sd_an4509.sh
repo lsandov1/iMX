@@ -1,6 +1,12 @@
 #!/usr/bin/env bash        
 
+if [ -z $1 ]; then
+  echo "Usage: $0 /dev/sbX"
+  exit -1
+fi
+
 dev=$1
+
 
 # by default, all operations are 'quiet', no ouput log
 # Comment out the above lines in case you need to a verbose log
@@ -14,21 +20,21 @@ tmp_folder=`mktemp -d`
 cd $tmp_folder
 
 echo "Download scripts"
-curl    $curl_verbose_level https://raw.github.com/lsandoval/iMX/master/flash/mk_mx_sd > mk_mx_sd
-curl    $curl_verbose_level https://raw.github.com/lsandoval/iMX/master/app-notes/AN4509/flash_sd/mk_image > mk_image
+$DEBUG curl    $curl_verbose_level https://raw.github.com/lsandoval/iMX/master/flash/mk_mx_sd > mk_mx_sd
+$DEBUG curl    $curl_verbose_level https://raw.github.com/lsandoval/iMX/master/app-notes/AN4509/flash_sd/mk_image > mk_image
 
 chmod +x ./mk_mx_sd ./mk_image
            
 echo "Download binaries: u-boot and kernels"
 # u-boot and kernels
-wget    $wget_verbose_level \
+$DEBUG wget    $wget_verbose_level \
         https://community.freescale.com/servlet/JiveServlet/downloadBody/93998-102-1-4230/u-boot.bin.zip \
         https://community.freescale.com/servlet/JiveServlet/downloadBody/93999-102-1-4231/uImage.zip \
         https://community.freescale.com/servlet/JiveServlet/downloadBody/94000-102-1-4232/uImageMaxPower.zip \
 
 # filesystem
 echo "Download binaries: filesystem"
-wget    $wget_verbose_level \
+$DEBUG wget    $wget_verbose_level \
         https://community.freescale.com/servlet/JiveServlet/downloadBody/94001-102-1-4233/xaa.zip \
         https://community.freescale.com/servlet/JiveServlet/downloadBody/94002-102-1-4234/xab.zip \
         https://community.freescale.com/servlet/JiveServlet/downloadBody/94013-102-1-4235/xac.zip \
@@ -39,24 +45,24 @@ wget    $wget_verbose_level \
         https://community.freescale.com/servlet/JiveServlet/downloadBody/94012-102-1-4241/xah.zip
 
 
-echo "Unpack the root filesystem"
-rootfs=rootfs.tar.bz2
-for i in xa*.zip; do gunzip $i -c >> $rootfs; done
+echo "Unzip downloaded files"
+for i in u*.zip; do $DEBUG unzip $i; done
+rootfs=rootfs.tar.bz2; for i in xa*.zip; do $DEBUG gunzip $i -c >> $rootfs; done
 
 tmp_rootfs_folder=`mktemp -d`
-sudo tar "xjf$tar_verbose_level" $rootfs -C $tmp_rootfs_folder
+$DEBUG sudo tar "xjf$tar_verbose_level" $rootfs -C $tmp_rootfs_folder
                 
 echo "Flash the SD"
-sudo ./mk_image $dev \
+$DEBUG sudo ./mk_image $dev \
                 u-boot.bin \
                 uImage \
-                uImageMaxPower \
-                $tmp_rootfs_folder
+                uImageMaxPower # \
+#                $tmp_rootfs_folder
 
 #echo "Clean up: remove temporal folders"
-cd -
-rm -rf $tmp_folder
-sudo rm -rf $tmp_rootfs_folder
+$DEBUG cd -
+$DEBUG rm -rf $tmp_folder
+$DEBUG sudo rm -rf $tmp_rootfs_folder
 
 echo "Following steps:"
 echo

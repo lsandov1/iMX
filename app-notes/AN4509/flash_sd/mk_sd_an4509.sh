@@ -61,9 +61,11 @@ $DEBUG sudo ./mk_image $dev \
 
 #echo "Clean up: remove temporal folders"
 $DEBUG cd -
-$DEBUG rm -rf $tmp_folder
-$DEBUG sudo rm -rf $tmp_rootfs_folder
 
+echo "Temporal folders created:"
+echo "binaries: $tmp_folder"
+echo "rootfs: $tmp_rootfs_folder"
+echo
 echo "Following steps:"
 echo
 echo "1. Plug the SD on the target (i.MX6)"

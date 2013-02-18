@@ -142,7 +142,7 @@ p
 1
 $2
 
-$WRITE" | sudo fdisk $1 -u='sectors'
+$WRITE" | $DEBUG sudo fdisk $1 -u
 
     # format device
     $DEBUG sudo mkfs.ext3 $1"1"

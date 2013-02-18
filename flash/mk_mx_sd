@@ -151,7 +151,7 @@ $WRITE" | $DEBUG sudo fdisk $1 -u
     tmp_folder=`mktemp -d`
     $DEBUG sudo mount $1"1" $tmp_folder
     $DEBUG cd $3
-    $DEBUG sudo cp -rpa [A-z]* $tmp_folder
+    $DEBUG sudo cp -vrpa [A-z]* $tmp_folder
     $DEBUG cd -
     $DEBUG sudo umount $tmp_folder
     $DEBUG rmdir $tmp_folder

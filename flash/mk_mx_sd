@@ -15,7 +15,7 @@ uboot_padding=2
 seek_uboot=2
 seek_kernel=2048
 seek_partition=16384
-suffix_partition=16384
+suffix_partition=''
 
 DEBUG=
 
@@ -149,11 +149,11 @@ $2
 $WRITE" | $DEBUG sudo fdisk $1 -u
 
     # format device
-    $DEBUG sudo mkfs.ext3 $1$4"1"
+    $DEBUG sudo mkfs.ext3 ${1}${4}"1"
 
     #copy filesystem
     tmp_folder=`mktemp -d`
-    $DEBUG sudo mount $1$4"1" $tmp_folder
+    $DEBUG sudo mount ${1}${4}"1" $tmp_folder
     $DEBUG cd $3
     $DEBUG sudo cp -vrpa [A-z]* $tmp_folder
     $DEBUG cd -

@@ -15,10 +15,11 @@ uboot_padding=2
 seek_uboot=2
 seek_kernel=2048
 seek_partition=16384
+suffix_partition=16384
 
 DEBUG=
 
-OPTIONS=":HDd:u:k:r:b:x:y:s:p:"
+OPTIONS=":HDd:u:k:r:b:x:y:s:p:S:"
 
 # Usage function
 function print_usage() {
@@ -35,6 +36,7 @@ function print_usage() {
     echo -e "         -x  $seek_uboot   [U-boot starting block]"
     echo -e "         -y  $seek_kernel  [Kernel starting block]"
     echo -e "         -s  $seek_partition [Partition starting block]"
+    echo -e "         -S  $suffix_partition [add a suffix on device: /dev/mmcbk0<suffix>X"
     echo -e "\n"
   }
 
@@ -64,6 +66,8 @@ do
     y ) seek_kernel="$OPTARG"
         ;;
     s ) seek_partition="$OPTARG"
+        ;;
+    S ) suffix_partition="$OPTARG"
         ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -145,11 +149,11 @@ $2
 $WRITE" | $DEBUG sudo fdisk $1 -u
 
     # format device
-    $DEBUG sudo mkfs.ext3 $1"1"
+    $DEBUG sudo mkfs.ext3 $1$4"1"
 
     #copy filesystem
     tmp_folder=`mktemp -d`
-    $DEBUG sudo mount $1"1" $tmp_folder
+    $DEBUG sudo mount $1$4"1" $tmp_folder
     $DEBUG cd $3
     $DEBUG sudo cp -vrpa [A-z]* $tmp_folder
     $DEBUG cd -
@@ -203,5 +207,5 @@ fi
 # Make partition and copy filesystem
 if [[ -n $rootfs ]]; then 
   echo -e "Creating Partition and copying the filesystem"
-  primary_partition $device $seek_partition $rootfs
+  primary_partition $device $seek_partition $rootfs $suffix_partition
 fi
